@@ -2,7 +2,23 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
+
+
+# This was just added so you might what to look at it
+#let
+  #unstable = import (builtins.fetchTarball {
+  #  url = "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
+  #}) {config = config.nixpkgs.config;};
+  #nix-software-center = import (pkgs.fetchFromGitHub {
+    #owner = "snowfallorg";
+    #repo = "nix-software-center";
+    #rev = "0.1.2";
+    #sha256 = "xiqF1mP8wFubdsAQ1BmfjzCgOD3YZf7EGWl9i69FTls=";
+  #}) {pkgs = unstable;};
+#in
+#This is the end of what was added above
+
 
 {
   imports =
@@ -11,9 +27,8 @@
     ];
 
   # Bootloader.
-  boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda";
-  boot.loader.grub.useOSProber = true;
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -44,11 +59,19 @@
   };
 
   # Enable the X11 windowing system.
-  services.xserver.enable = true;
+	services.xserver.enable = true;
 
-  # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
+  # Enable the XFCE Desktop Environment.
+	services.xserver.displayManager.lightdm.enable = true;
+	services.xserver.desktopManager.xfce.enable = true;
+  
+  #Enable the Gnome Desktop Enviroment.
+
+	#services.xserver.displayManager.gdm.enable = true;
+	#services.xserver.desktopManager.gnome.enable = true;
+
+
+
 
   # Configure keymap in X11
   services.xserver = {
@@ -57,36 +80,7 @@
   };
 
   # Enable CUPS to print documents.
-  services.printing.enable = true;
-  services.printing.drivers = [ pkgs.gutenprint pkgs.epsonscan2 pkgs.epson-201106w pkgs.epson-escpr ];
-
-
-services.printing.browsing = true;
-services.printing.browsedConf = ''
-BrowseDNSSDSubTypes _cups,_print
-BrowseLocalProtocols all
-BrowseRemoteProtocols all
-CreateIPPPrinterQueues All
-
-BrowseProtocols all
-    '';
-services.avahi = {
-  enable = true;
-  nssmdns = true;
-  openFirewall = true;
-};
-
-
-
-
-
-
-
-
-
-
-
-
+#  services.printing.enable = true;
 
   # Enable sound with pipewire.
   sound.enable = true;
@@ -107,22 +101,33 @@ services.avahi = {
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
+  
+  #Flatpak
+
+#	services.flatpak.enable = true;
+#	xdg.portal = {
+#	enable = true;
+#	wlr.enable = true;
+#	};
+
+  #Jellyfin Server
+	
+
+
+	services.jellyfin = {
+	enable = true;
+	openFirewall = true;
+	};
+		
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.b = {
+  users.users.bob = {
     isNormalUser = true;
-    description = "b";
+    description = "bob";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-      firefox
-      thunderbird
-	htop
-	screen
-	brave
-	uget
-	axel
-
-    ];
+	password = "b";
+	packages = with pkgs; [
+      	];
   };
 
   # Allow unfree packages
@@ -131,9 +136,18 @@ services.avahi = {
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
-  ];
+	#nix-software-center
+	wget
+	firefox
+	thunderbird
+	screen
+	filezilla
+	htop
+	lynx
+	jellyfin
+	jellyfin-web
+	jellyfin-ffmpeg
+      	];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
