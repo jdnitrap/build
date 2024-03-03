@@ -79,8 +79,24 @@
     xkbVariant = "";
   };
 
-  # Enable CUPS to print documents.
-#  services.printing.enable = true;
+ 
+# Enable CUPS to print documents.
+	services.printing.enable = true;
+  	services.printing.drivers = [ pkgs.gutenprint pkgs.epsonscan2 pkgs.epson-201106w pkgs.epson-escpr ];
+	services.printing.browsing = true;
+	services.printing.browsedConf = ''
+	BrowseDNSSDSubTypes _cups,_print
+	BrowseLocalProtocols all
+	BrowseRemoteProtocols all
+	CreateIPPPrinterQueues All
+	BrowseProtocols all
+    	'';
+	services.avahi = {
+  	enable = true;
+  	nssmdns = true;
+  	openFirewall = true;
+	};
+
 
   # Enable sound with pipewire.
   sound.enable = true;
