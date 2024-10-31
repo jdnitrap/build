@@ -2,23 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, lib, ... }:
-
-
-# This was just added so you might what to look at it
-#let
-  #unstable = import (builtins.fetchTarball {
-  #  url = "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-  #}) {config = config.nixpkgs.config;};
-  #nix-software-center = import (pkgs.fetchFromGitHub {
-    #owner = "snowfallorg";
-    #repo = "nix-software-center";
-    #rev = "0.1.2";
-    #sha256 = "xiqF1mP8wFubdsAQ1BmfjzCgOD3YZf7EGWl9i69FTls=";
-  #}) {pkgs = unstable;};
-#in
-#This is the end of what was added above
-
+{ config, pkgs, ... }:
 
 {
   imports =
@@ -29,6 +13,8 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  
+
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -59,92 +45,55 @@
   };
 
   # Enable the X11 windowing system.
-	services.xserver.enable = true;
+  services.xserver.enable = true;
 
-  # Enable the XFCE Desktop Environment.
-	services.xserver.displayManager.lightdm.enable = true;
-	services.xserver.desktopManager.xfce.enable = true;
+  # Enable the GNOME Desktop Environment.
+  services.xserver.displayManager.lightdm.enable = true;
+  services.xserver.desktopManager.deepin.enable  = false;
+  services.xserver.windowManager.icewm.enable    = false;
+  services.xserver.desktopManager.plasma6.enable   = false;
+  services.xserver.desktopManager.xfce.enable    = true;
+  services.xserver.desktopManager.lxqt.enable    = true;
+  services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.desktopManager.cinnamon.enable = false;
   
-  #Enable the Gnome Desktop Enviroment.
-
-	#services.xserver.displayManager.gdm.enable = true;
-	#services.xserver.desktopManager.gnome.enable = true;
-
-
-
-
   # Configure keymap in X11
-  services.xserver = {
+  services.xserver.xkb = {
     layout = "us";
-    xkbVariant = "";
+    variant = "";
   };
 
- 
-# Enable CUPS to print documents.
-	services.printing.enable = true;
-  	services.printing.drivers = [ pkgs.gutenprint pkgs.epsonscan2 pkgs.epson-201106w pkgs.epson-escpr ];
-	services.printing.browsing = true;
-	services.printing.browsedConf = ''
-	BrowseDNSSDSubTypes _cups,_print
-	BrowseLocalProtocols all
-	BrowseRemoteProtocols all
-	CreateIPPPrinterQueues All
-	BrowseProtocols all
-    	'';
-	services.avahi = {
-  	enable = true;
-  	nssmdns = true;
-  	openFirewall = true;
-	};
-
+  # Enable CUPS to print documents.
+  services.printing.enable = false;
 
   # Enable sound with pipewire.
-  sound.enable = true;
-  hardware.pulseaudio.enable = false;
-  security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
+  hardware.pulseaudio.enable = true;
+  hardware.pulseaudio.support32Bit = true;
+  hardware.pulseaudio.package = pkgs.pulseaudioFull;
+  nixpkgs.config.pulseaudio = true;
     # If you want to use JACK applications, uncomment this
     #jack.enable = true;
 
     # use the example session manager (no others are packaged yet so this is enabled by default,
     # no need to redefine it in your config for now)
     #media-session.enable = true;
-  };
+  
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
-  
-  #Flatpak
-
-#	services.flatpak.enable = true;
-#	xdg.portal = {
-#	enable = true;
-#	wlr.enable = true;
-#	};
-
-  #Jellyfin Server
-	
-
-
-	services.jellyfin = {
-	enable = true;
-	openFirewall = true;
-	};
-		
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.bob = {
     isNormalUser = true;
     description = "bob";
-    extraGroups = [ "networkmanager" "wheel" ];
-	password = "b";
-	packages = with pkgs; [
-      	];
+    extraGroups = [ "networkmanager" "wheel" "audio" "docker" ];
+    packages = with pkgs; [
+    #  thunderbird
+    ];
   };
+
+  # Install firefox.
+  programs.firefox.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -152,18 +101,34 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-	#nix-software-center
-	wget
-	firefox
-	thunderbird
-	screen
-	filezilla
-	htop
-	lynx
-	jellyfin
-	jellyfin-web
-	jellyfin-ffmpeg
-      	];
+  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+  #  wget
+  
+  abiword
+appimage-run
+btop
+clamav
+curl
+docker
+docker-compose
+elinks
+firehol
+fwbuilder
+geany
+gnumeric
+htop
+nixos-firewall-tool
+opensnitch
+opensnitch-ui
+clamtk
+podman
+podman-compose
+pods
+screen
+tmux
+wget
+  
+  ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -182,7 +147,7 @@
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
+   networking.firewall.enable = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
@@ -190,6 +155,13 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "23.11"; # Did you read the comment?
-
+  system.stateVersion = "24.05"; # Did you read the comment?
+  
+  hardware.enableAllFirmware = true;
+  virtualisation.docker.enable = true;
+  
+  
+  services.clamav.daemon.enable = true;
+  services.opensnitch.enable = true;
+  
 }
