@@ -44,8 +44,7 @@ ugm
 ugrep
 w3m
 wego
-wiki-tui-0.8.2
-wordgrinder-0.8
-wtf-0.43.0
-zellij-0.40.1
-
+wiki-tui
+wordgrinder
+wtf
+zellij
